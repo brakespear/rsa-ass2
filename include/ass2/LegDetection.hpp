@@ -9,31 +9,38 @@
 #ifndef LEG_DETECTION_HPP
 #define LEG_DETECTION_HPP
 
+#include <crosbot/handle.hpp>
+#include <crosbot/geometry/points.hpp>
 
 #include <ros/publisher.h>
 #include <ros/subscriber.h>
 #include <sensor_msgs/LaserScan.h>
 #include <geometry_msgs/Twist.h>
-
+#include <std_msgs/String.h>
 
 #include <tf/transform_listener.h>
-#include <crosbot/geometry/points.hpp>
+
+#include <sstream>
 
 using namespace std;
 
 class LegDetector {
 private:
 	ros::Subscriber scanSub;
-	tf::TransformListener tfListener;
+	//tf::TransformListener tfListener;
 	
-	list<Point2D> pointCloud;
-	list<list<Point2D>> clusters;
-	int numClusters;
+	vector<crosbot::Point2D> pointCloud;
+	vector<vector<crosbot::Point2D>> clusters;
+	int numClusters = 0;
+	int debug = true;
 	
 public:
 	LegDetector();
 	virtual ~LegDetector() {};
 	void callbackScan(const sensor_msgs::LaserScanConstPtr& scan);
+	void printClusters();
+	void findClusters();
+	void printPointCloud();
 
 };
 
