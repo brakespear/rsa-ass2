@@ -13,6 +13,10 @@
 #define MIN_RANGE 0.0
 #define MAX_RANGE 10.0
 #define CLUSTER_DISTANCE 0.025
+#define MAX_CLUSTER_SIZE_DELTA 5
+#define MAX_LEG_GAP 0.2
+#define MAX_CLUSTER_SIZE 12
+#define MIN_CLUSTER_SIZE 6
 
 using namespace std;
 
@@ -42,7 +46,8 @@ void LegDetector::callbackScan(const sensor_msgs::LaserScanConstPtr& scan) {
 		printClusters();
 		debug = false;
 	}
-	
+	findLegs();
+	cout << legsCenter.x << "," << legsCenter.y << endl;
 	
 }
 
@@ -86,6 +91,72 @@ void LegDetector::printPointCloud() {
 	}
 }
 
-	
+void LegDetector::findLegs() {
+	vector<crosbot::Point2D> cluster1 = clusters[0];
+	vector<crosbot::Point2D> cluster2 = clusters[1];
+	vector<crosbot::Point2D> cluster3;
+	if (legPair(cluster1,cluster2)) {
+		return;
+	} else if (singleLegCluster(cluster1)) {
+		return;
+	} else if (singleLegCluster(cluster2)) {
+		return;
+	}
+	for (int i=2;i<clusters.size();i++) {
+		cluster3 = clusters[i];
+		if (legPair(cluster1,cluster3)) {
+			break;
+		} else if (legPair(cluster2, cluster3)) {
+			break;
+		} else if (singleLegCluster(cluster3)) {
+			break;
+		}
+	}
+}
 
+bool LegDetector::legPair(vector<crosbot::Point2D> cluster1, vector<crosbot::Point2D> cluster2) {
+	int cluster1size = cluster1.size();
+	int cluster2size = cluster2.size();
+	crosbot::Point2D p1;
+	crosbot::Point2D p2;
+	// First cluster should have size within a certain range
+ 	// and the two clusters should be similar in size
+	if (cluster1size>=MIN_CLUSTER_SIZE && cluster1size<=MAX_CLUSTER_SIZE && abs(cluster1size-cluster2size)<=MAX_CLUSTER_SIZE_DELTA) {
+		p1 = cluster1[cluster1size-1];
+		p2 = cluster2[0];
+		// the gap  between the legs should be smaller than some value
+		if (p1.distanceTo(p2)<=MAX_LEG_GAP) {
+			// take the average of the 
+			legsCenter = Crosbot::Point2D((p1.x+p2.x)/2.0,(p1.y+p2.y)/2.0);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool LegDetector::singleLegCluster(vector<crosbot::Point2D> cluster) {
+	int size = cluster.size();
+	// cluster for double leg should be twice the size of single leg
+	if (size/2>=MIN_CLUSTER_SIZE && size/2<=MAX_CLUSTER_SIZE) {
+		crosbot::Point2D leftPoint = cluster[0];
+		crosbot::Point2D middlePoint = cluster[size/2];
+		crosbot::Point2D rightPoint = cluster[size-1];
+		double m1 = calculateGradient(leftPoint,middlePoint);
+		double m2 = calculateGradient(middlePoint,rightPoint);
+		//gradients should have opposite signs
+		if ((m1<0 &&m2>0) || (m1>0&&m2<0)) {
+			// both gradients should have magnitude greater than some value
+			if (abs(m1)>GRADIENT_VALUE && abs(m2)>GRADIENT_VALUE) {
+				legsCenter = middlePoint;
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+			
+			
+	
 

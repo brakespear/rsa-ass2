@@ -33,6 +33,7 @@ private:
 	vector<vector<crosbot::Point2D>> clusters;
 	int numClusters = 0;
 	int debug = true;
+	crosbot::Point2D legsCenter;
 	
 public:
 	LegDetector();
@@ -41,7 +42,9 @@ public:
 	void printClusters();
 	void findClusters();
 	void printPointCloud();
-
+	void findLegs();
+	bool legPair(vector<crosbot::Point2D> cluster1, vector<crosbot::Point2D> cluster2);
+	bool singleLegCluster(vector<crosbot::Point2D> cluster);
 };
 
 
