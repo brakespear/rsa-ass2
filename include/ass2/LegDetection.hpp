@@ -45,6 +45,8 @@ public:
 	void findLegs();
 	bool legPair(vector<crosbot::Point2D> cluster1, vector<crosbot::Point2D> cluster2);
 	bool singleLegCluster(vector<crosbot::Point2D> cluster);
+	void printCluster(vector<crosbot::Point2D> cluster);
+	double calculateGradient(crosbot::Point2D p1, crosbot::Point2D p2);
 };
 
 

@@ -15,8 +15,10 @@
 #define CLUSTER_DISTANCE 0.025
 #define MAX_CLUSTER_SIZE_DELTA 5
 #define MAX_LEG_GAP 0.2
-#define MAX_CLUSTER_SIZE 12
-#define MIN_CLUSTER_SIZE 6
+#define MAX_CLUSTER_SIZE 40
+#define MIN_CLUSTER_SIZE 8
+#define GRADIENT_VALUE 0.2 //figure this out
+
 
 using namespace std;
 
@@ -44,10 +46,12 @@ void LegDetector::callbackScan(const sensor_msgs::LaserScanConstPtr& scan) {
 	if (debug) {
 		//printPointCloud();
 		printClusters();
-		debug = false;
 	}
 	findLegs();
-	cout << legsCenter.x << "," << legsCenter.y << endl;
+    if (debug) {
+	    cout << legsCenter.x << "," << legsCenter.y << endl;
+    }
+    debug = false;
 	
 }
 
@@ -111,6 +115,8 @@ void LegDetector::findLegs() {
 		} else if (singleLegCluster(cluster3)) {
 			break;
 		}
+        cluster1 = cluster2;
+        cluster2 = cluster3;
 	}
 }
 
@@ -126,8 +132,8 @@ bool LegDetector::legPair(vector<crosbot::Point2D> cluster1, vector<crosbot::Poi
 		p2 = cluster2[0];
 		// the gap  between the legs should be smaller than some value
 		if (p1.distanceTo(p2)<=MAX_LEG_GAP) {
-			// take the average of the 
-			legsCenter = Crosbot::Point2D((p1.x+p2.x)/2.0,(p1.y+p2.y)/2.0);
+			// take the average of the two points
+			legsCenter = crosbot::Point2D((p1.x+p2.x)/2.0,(p1.y+p2.y)/2.0);
 			return true;
 		}
 	}
@@ -156,7 +162,18 @@ bool LegDetector::singleLegCluster(vector<crosbot::Point2D> cluster) {
 }
 
 
-			
+double LegDetector::calculateGradient(crosbot::Point2D p1, crosbot::Point2D p2) {
+	return ((p2.y-p1.y)/(p2.x-p1.x));
+}
+
+void LegDetector::printCluster(vector<crosbot::Point2D> cluster) {
+	cout << "{";
+	for (int i=0; i<cluster.size(); i++) {
+		crosbot::Point2D p = cluster[i];
+		cout << "("<<p.x<<","<<p.y<<") ";
+	}
+	cout << "}\n";
+}
 			
 	
 
