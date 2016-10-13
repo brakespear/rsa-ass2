@@ -1,5 +1,5 @@
 /*
- * Peforms leg detection
+ * Peforms leg detection by creating clusters from the laser scanner data
  * As part of the overall goal of person following
  * Written by Elliott Smith
  * For COMP3431 Assignment 2 Robocup@Home
@@ -49,9 +49,9 @@ void LegDetector::callbackScan(const sensor_msgs::LaserScanConstPtr& scan) {
 	}
 	findLegs();
     if (debug) {
-	    cout << legsCenter.x << "," << legsCenter.y << endl;
+	    cout << "The legs are centered at: " << legsCenter.x << "," << legsCenter.y << endl;
     }
-    debug = false;
+	debug = false;
 	
 }
 
@@ -103,18 +103,24 @@ void LegDetector::findLegs() {
 		return;
 	} else if (singleLegCluster(cluster1)) {
 		return;
+    }
+    /*
 	} else if (singleLegCluster(cluster2)) {
 		return;
 	}
+    */
 	for (int i=2;i<clusters.size();i++) {
 		cluster3 = clusters[i];
 		if (legPair(cluster1,cluster3)) {
 			break;
 		} else if (legPair(cluster2, cluster3)) {
 			break;
+        }
+        /*
 		} else if (singleLegCluster(cluster3)) {
 			break;
 		}
+        */
         cluster1 = cluster2;
         cluster2 = cluster3;
 	}
@@ -127,12 +133,17 @@ bool LegDetector::legPair(vector<crosbot::Point2D> cluster1, vector<crosbot::Poi
 	crosbot::Point2D p2;
 	// First cluster should have size within a certain range
  	// and the two clusters should be similar in size
-	if (cluster1size>=MIN_CLUSTER_SIZE && cluster1size<=MAX_CLUSTER_SIZE && abs(cluster1size-cluster2size)<=MAX_CLUSTER_SIZE_DELTA) {
+	if (cluster1size>=MIN_CLUSTER_SIZE && cluster1size<=MAX_CLUSTER_SIZE && cluster2size>=MIN_CLUSTER_SIZE && cluster2size<=MAX_CLUSTER_SIZE && abs(cluster1size-cluster2size)<=MAX_CLUSTER_SIZE_DELTA) {
 		p1 = cluster1[cluster1size-1];
 		p2 = cluster2[0];
 		// the gap  between the legs should be smaller than some value
 		if (p1.distanceTo(p2)<=MAX_LEG_GAP) {
 			// take the average of the two points
+            if (debug) {
+                cout << "The two clusters that form the legs are:\n";
+            }
+            printCluster(cluster1);
+            printCluster(cluster2);
 			legsCenter = crosbot::Point2D((p1.x+p2.x)/2.0,(p1.y+p2.y)/2.0);
 			return true;
 		}
@@ -154,6 +165,9 @@ bool LegDetector::singleLegCluster(vector<crosbot::Point2D> cluster) {
 			// both gradients should have magnitude greater than some value
 			if (abs(m1)>GRADIENT_VALUE && abs(m2)>GRADIENT_VALUE) {
 				legsCenter = middlePoint;
+                cout << "****************************\n";
+                cout << "Found single leg cluster\n";
+                cout << "****************************\n";
 				return true;
 			}
 		}
@@ -167,12 +181,14 @@ double LegDetector::calculateGradient(crosbot::Point2D p1, crosbot::Point2D p2) 
 }
 
 void LegDetector::printCluster(vector<crosbot::Point2D> cluster) {
-	cout << "{";
-	for (int i=0; i<cluster.size(); i++) {
-		crosbot::Point2D p = cluster[i];
-		cout << "("<<p.x<<","<<p.y<<") ";
-	}
-	cout << "}\n";
+    if (debug) {
+	    cout << "{";
+	    for (int i=0; i<cluster.size(); i++) {
+		    crosbot::Point2D p = cluster[i];
+		    cout << "("<<p.x<<","<<p.y<<") ";
+	    }
+	    cout << "}\n";
+    }
 }
 			
 	

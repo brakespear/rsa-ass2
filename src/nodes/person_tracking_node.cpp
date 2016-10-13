@@ -4,6 +4,7 @@
 #include <cstdlib>
 
 #include <ass2/LegDetection.hpp>
+#include <ass2/PolarLegDetection.hpp>
 
 #define LOG_START  "Ass2PersonFollowingNode ::"
 
@@ -11,7 +12,7 @@ int main(int argc, char **argv) {
 	ros::init(argc, argv, "person_tracking_node");
 
 	ros::NodeHandle nh("~");
-	LegDetector legDetector;
+	PolarLegDetector polarLegDetector;
 	
 	while(ros::ok()) {
 		ROS_INFO("%s spinning",LOG_START);

@@ -31,7 +31,6 @@ private:
 	
 	vector<crosbot::Point2D> pointCloud;
 	vector<vector<crosbot::Point2D>> clusters;
-	int numClusters = 0;
 	int debug = true;
 	crosbot::Point2D legsCenter;
 	

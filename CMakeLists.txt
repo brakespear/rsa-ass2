@@ -121,6 +121,7 @@ include_directories(
 ## Declare a C++ library
 add_library(ass2_library
   src/LegDetection.cpp
+  src/PolarLegDetection.cpp
 )
 
 ## Add cmake target dependencies of the library
