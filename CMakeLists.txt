@@ -113,15 +113,15 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
+#include_directories(include)
+#include_directories(
+#  ${catkin_INCLUDE_DIRS}
+#)
 
 ## Declare a C++ library
-add_library(ass2_library
-  src/LegDetection.cpp
-)
+#add_library(ass2_library
+#  src/LegDetection.cpp
+#)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -129,23 +129,23 @@ add_library(ass2_library
 # add_dependencies(ass2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-add_executable(person_tracking_node src/nodes/person_tracking_node.cpp)
+#add_executable(person_tracking_node src/nodes/person_tracking_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(ass2_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(ass2_library
-  ${catkin_LIBRARIES}
-)
+#target_link_libraries(ass2_library
+#  ${catkin_LIBRARIES}
+#)
 
 
-target_link_libraries(person_tracking_node
-  ${catkin_LIBRARIES}
-  ${OpenCV_LIBRARIES}
-  ass2_library
-)
+#target_link_libraries(person_tracking_node
+#  ${catkin_LIBRARIES}
+#  ${OpenCV_LIBRARIES}
+#  ass2_library
+#)
 
 #############
 ## Install ##
