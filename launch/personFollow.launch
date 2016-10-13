@@ -1,0 +1,7 @@
+<!-- Launch the person following node -->
+<launch >
+    <node pkg="ass2" type="person_tracking_node" name="person_tracking_node" output="screen">
+        <rosparam>
+        </rosparam>
+    </node>
+</launch>
