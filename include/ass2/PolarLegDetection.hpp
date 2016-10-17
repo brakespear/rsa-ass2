@@ -29,7 +29,7 @@ class PolarLegDetector {
 private:
 	ros::Subscriber scanSub;
 	ros::Publisher posePub;
-	int debug = true;
+	int debug = false;
 	vector<vector<crosbot::Point2D>> legs;
 	crosbot::Point2D legsCentre;
 	
