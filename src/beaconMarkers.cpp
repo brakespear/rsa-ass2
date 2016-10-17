@@ -1,6 +1,6 @@
 
 #include <ros/ros.h>
-#include "ass2/image_converter.hpp"
+#include "ass2/beaconMarkers.hpp"
 
 /*
 beacon_msg.msg:
@@ -15,11 +15,10 @@ int32 maxRow
 */
 
 using namespace cv;
-ass2::beacon_msg beacon;
 
-void publishBeacon() {
+void beaconMarkers::publishBeacon() {
     //tf::StampedTransform transform;
-	time_t timer; //current time
+	time_t timer, start_time; //current time
 	time(&timer); 
       
     double diff = difftime(timer, start_time);
@@ -97,7 +96,7 @@ void publishBeacon() {
     marker_pub.publish(marker);
 }
 
-void callback(const ass2::beacon_msg &beacon_msg) {
+void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
 	beacon = beacon_msg;
 	/*
 	int id = beacon_msg->id;
@@ -110,4 +109,5 @@ void callback(const ass2::beacon_msg &beacon_msg) {
 	int maxRow = beacon_msg->maxRow;
 	*/
 }
+
 
