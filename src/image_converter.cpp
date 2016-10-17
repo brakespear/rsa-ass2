@@ -8,9 +8,9 @@ using namespace cv;
 ImageConverter::ImageConverter()    : it_(nh_) 
 {
   ROS_INFO("hello\n");
-    // Subscribe to depth and colour images
+  // Subscribe to depth and colour images
 	depth_sub = nh_.subscribe("/camera/depth/image_rect", 1, &ImageConverter::depth_callback, this);
-    image_sub_ = it_.subscribe("/camera/rgb/image_color", 1, &ImageConverter::imageCb, this);
+  image_sub_ = it_.subscribe("/camera/rgb/image_color", 1, &ImageConverter::imageCb, this);
 	beacon_pub = nh_.advertise<ass2::beacon_msg>("beaconMessage",100);
 	//beacon_placed_sub = nh_.subscribe("beaconMessage_return",1, &ImageConverter::beaconCb,this);
 	pink_binary_pub = it_.advertise("/pink/image/binary",1);
@@ -19,9 +19,9 @@ ImageConverter::ImageConverter()    : it_(nh_)
 	blue_binary_pub = it_.advertise("/blue/image/binary",1);
     ros::NodeHandle paramNh("~");
 
-    // Load beacons
+  // Load beacons
 	Beacon genericBeacon;
-    beaconsList = genericBeacon.parseBeacons(paramNh);
+  beaconsList = genericBeacon.parseBeacons(paramNh);
 }
 
 ImageConverter::~ImageConverter()
@@ -78,7 +78,7 @@ std::vector<int> ImageConverter::getColouredObjectDetectedXY(std::string colour,
   	erode(colouredImg, colouredImg, getStructuringElement(MORPH_ELLIPSE, Size(25, 25)) );
   	dilate( colouredImg, colouredImg, getStructuringElement(MORPH_ELLIPSE, Size(25, 25)) ); 
 
-    //morphological closing (fill small holes in the foreground)
+  //morphological closing (fill small holes in the foreground)
 	dilate( colouredImg, colouredImg, getStructuringElement(MORPH_ELLIPSE, Size(25, 25)) ); 
 	erode(colouredImg, colouredImg, getStructuringElement(MORPH_ELLIPSE, Size(25, 25)) );
 	//publish the colour search binary image
@@ -199,8 +199,8 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg)
 		detectedBeacon.beaconMsg.bottomColour = detectedBeacon.bottom;
 		detectedBeacon.beaconMsg.col = (greenObjectX+pinkObjectX)/2;
 		detectedBeacon.beaconMsg.row = (greenObjectY+pinkObjectY)/2;
-		detectedBeacon.beaconMsg.minRow = yellowObjectY;
-		detectedBeacon.beaconMsg.maxRow = pinkObjectY;
+		detectedBeacon.beaconMsg.minRow = pinkObjectY;
+		detectedBeacon.beaconMsg.maxRow = greenObjectY;
 		detectedBeacon.beaconMsg.depth = 0;
 		beacon_pub.publish(detectedBeacon.beaconMsg);
 		/*
@@ -323,37 +323,40 @@ void ImageConverter::depth_callback(const sensor_msgs::ImageConstPtr& depthMsg) 
     if (depthMsg->encoding == sensor_msgs::image_encodings::TYPE_32FC1 && beaconDetected) {
 		    ROS_INFO("Depth slice requested for column %d from row %d to %d\n",detectedBeacon.beaconMsg.col,detectedBeacon.beaconMsg.minRow,detectedBeacon.beaconMsg.maxRow);
         int index = (depthMsg->step*detectedBeacon.beaconMsg.minRow)+(4*detectedBeacon.beaconMsg.col);
-		float totalDepth;
-		float numberOfRows = detectedBeacon.beaconMsg.maxRow-detectedBeacon.beaconMsg.minRow;
-		float depth;
-		int i = 0;
-		while (i<=numberOfRows) {
-			depth = *reinterpret_cast<const float*>(&depthMsg->data[index]);	
-			if (depth>=MIN_DEPTH && depth<=MAX_DEPTH) {
-				totalDepth+=depth;
-			}
-			i++;
-			index+=depthMsg->step; //shift down 1 row
-		}
+		    float totalDepth;
+		    float numberOfRows = detectedBeacon.beaconMsg.maxRow-detectedBeacon.beaconMsg.minRow;
+		    float depth;
+		    int i = 0;
+		    while (i<=numberOfRows) {
+		        //ROS_INFO("in the loop\n");
+			      depth = *reinterpret_cast<const float*>(&depthMsg->data[index]);
+			      //ROS_INFO("depth is %2f\n", depth);	
+			      if (depth>=MIN_DEPTH && depth<=MAX_DEPTH) {
+				        totalDepth+=depth;
+				        //ROS_INFO("in the if\n");
+			      }
+			      i++;
+			      index+=depthMsg->step; //shift down 1 row
+		    }
 
-    float beaconDepth;
-    if (numberOfRows) {
-  		beaconDepth = totalDepth/numberOfRows;
-    } else {
-      beaconDepth = totalDepth;
-    }
-		ROS_INFO("Depth calculated as %.2f\n",beaconDepth);
-		ass2::beacon_msg beaconMsg;
-		beaconMsg.id = detectedBeacon.id;
-		beaconMsg.topColour = detectedBeacon.top;
-		beaconMsg.bottomColour = detectedBeacon.bottom;
-		beaconMsg.col = detectedBeacon.beaconMsg.col;
-		beaconMsg.row = (detectedBeacon.beaconMsg.minRow+detectedBeacon.beaconMsg.maxRow)/2;
-		beaconMsg.depth = beaconDepth;
-		beacon_pub.publish(beaconMsg);
-		beaconDetected = false;
-	} else if (!beaconDetected) {
-		ROS_WARN("Depth not requested\n");
+        float beaconDepth;
+        if (numberOfRows) {
+  		      beaconDepth = totalDepth/numberOfRows;
+        } else {
+            beaconDepth = totalDepth;
+        }
+		    ROS_INFO("Depth calculated as %.2f\n",beaconDepth);
+		    ass2::beacon_msg beaconMsg;
+		    beaconMsg.id = detectedBeacon.id;
+		    beaconMsg.topColour = detectedBeacon.top;
+		    beaconMsg.bottomColour = detectedBeacon.bottom;
+		    beaconMsg.col = detectedBeacon.beaconMsg.col;
+		    beaconMsg.row = (detectedBeacon.beaconMsg.minRow+detectedBeacon.beaconMsg.maxRow)/2;
+		    beaconMsg.depth = beaconDepth;
+		    beacon_pub.publish(beaconMsg);
+		    beaconDetected = false;
+	  } else if (!beaconDetected) {
+		    ROS_WARN("Depth not requested\n");
     } else {
         ROS_WARN("Invalid image encoding: %s", depthMsg->encoding.c_str());
     }
