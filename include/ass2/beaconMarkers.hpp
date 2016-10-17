@@ -3,17 +3,23 @@
 
 #include <ros/ros.h>
 #include "ass2/image_converter.hpp"
+#include <visualization_msgs/Marker.h>
+#include <tf/transform_listener.h>
 
 class beaconMarkers {
 private:
+	image_transport::ImageTransport it_;
 	ros::NodeHandle nh_;
 	ass2::beacon_msg beacon;
+	visualization_msgs::Marker marker;
+	tf::TransformListener tf_listener;
+	tf::StampedTransform transform;
 
 	ros::Subscriber beacon_sub;
 	ros::Publisher marker_pub;
 
 public:
-	publishBeacon();
+	beaconMarkers();
 	void beacon_callback(const ass2::beacon_msg &beacon_msg);
 };
 

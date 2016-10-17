@@ -15,8 +15,10 @@ int32 maxRow
 */
 
 using namespace cv;
+//ass2::beacon_msg beacon;
 
-void beaconMarkers::publishBeacon() {
+beaconMarkers::beaconMarkers()    : it_(nh_) 
+{
     //tf::StampedTransform transform;
 	time_t timer, start_time; //current time
 	time(&timer); 
@@ -25,11 +27,10 @@ void beaconMarkers::publishBeacon() {
     if (diff < (double) 5) {
 		return;
     }
-    beacon_sub = nh_.subscribe("/beaconMessage", 100, &callback, this);
+    beacon_sub = nh_.subscribe("/beaconMessage", 100, &beaconMarkers::beacon_callback, this);
 
     marker_pub = nh_.advertise<visualization_msgs::Marker>("/beacons", 1);
-    
-    visualization_msgs::Marker marker;
+
     marker.header.frame_id="base_link";
     marker.header.stamp = ros::Time();
     
@@ -109,5 +110,4 @@ void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
 	int maxRow = beacon_msg->maxRow;
 	*/
 }
-
 
