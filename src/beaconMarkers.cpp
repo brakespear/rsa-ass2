@@ -17,7 +17,7 @@ int32 maxRow
 using namespace cv;
 ass2::beacon_msg beacon;
 
-void ImageConverter::publishBeacon() {
+void publishBeacon() {
     //tf::StampedTransform transform;
 	time_t timer; //current time
 	time(&timer); 
@@ -26,7 +26,7 @@ void ImageConverter::publishBeacon() {
     if (diff < (double) 5) {
 		return;
     }
-    beacon_sub = nh_.subscribe("/beaconMessage", 100, &ImageConverter::callback, this);
+    beacon_sub = nh_.subscribe("/beaconMessage", 100, &callback, this);
 
     marker_pub = nh_.advertise<visualization_msgs::Marker>("/beacons", 1);
     
@@ -97,7 +97,7 @@ void ImageConverter::publishBeacon() {
     marker_pub.publish(marker);
 }
 
-void ImageConverter::callback(const ass2::beacon_msg &beacon_msg) {
+void callback(const ass2::beacon_msg &beacon_msg) {
 	beacon = beacon_msg;
 	/*
 	int id = beacon_msg->id;
