@@ -128,6 +128,7 @@ add_library(ass2_library
   src/image_converter.cpp
   src/beacon.cpp
   src/PersonTracker.cpp
+  src/beaconMarkers.cpp
 )
 
 ## Add cmake target dependencies of the library
