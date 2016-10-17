@@ -46,7 +46,7 @@
 #define BLUE_LOW_VAL 0  //130
 #define BLUE_HIGH_VAL 255 //220
 
-#define MAX_DEPTH  1.5 //2.5
+#define MAX_DEPTH  2.5
 #define MIN_DEPTH  0.2
 
 
