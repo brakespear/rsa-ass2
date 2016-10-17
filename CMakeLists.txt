@@ -9,11 +9,15 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   message_runtime std_msgs sensor_msgs geometry_msgs
   crosbot_msgs crosbot
+  message_generation
+  image_transport
+  cv_bridge
+  #crosbot_explore
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(OpenCV)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -45,11 +49,10 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  beacon_msg.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -66,10 +69,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-#generate_messages(
-#  DEPENDENCIES
-#  std_msgs
-#)
+generate_messages(
+ DEPENDENCIES
+ std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -103,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ass2
-  CATKIN_DEPENDS roscpp rospy std_msgs crosbot
+  CATKIN_DEPENDS roscpp rospy std_msgs crosbot message_runtime
   DEPENDS system_lib
 )
 
@@ -122,6 +125,8 @@ include_directories(
 add_library(ass2_library
   src/LegDetection.cpp
   src/PolarLegDetection.cpp
+  src/image_converter.cpp
+  src/beacon.cpp
 )
 
 ## Add cmake target dependencies of the library
@@ -130,23 +135,30 @@ add_library(ass2_library
 # add_dependencies(ass2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-#add_executable(person_tracking_node src/nodes/person_tracking_node.cpp)
+add_executable(person_tracking_node src/nodes/person_tracking_node.cpp)
+add_executable(beacon_node src/nodes/beacon_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(ass2_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-#target_link_libraries(ass2_library
-#  ${catkin_LIBRARIES}
-#)
+target_link_libraries(ass2_library
+  ${catkin_LIBRARIES}
+)
 
 
-#target_link_libraries(person_tracking_node
-#  ${catkin_LIBRARIES}
-#  ${OpenCV_LIBRARIES}
-#  ass2_library
-#)
+target_link_libraries(person_tracking_node
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+  ass2_library
+)
+
+target_link_libraries(beacon_node
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+  ass2_library
+)
 
 #############
 ## Install ##
