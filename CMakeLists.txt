@@ -138,6 +138,7 @@ add_library(ass2_library
 ## Declare a C++ executable
 add_executable(person_tracking_node src/nodes/person_tracking_node.cpp)
 add_executable(beacon_node src/nodes/beacon_node.cpp)
+add_executable(beacon_markers_node src/nodes/beacon_markers_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -155,6 +156,12 @@ target_link_libraries(person_tracking_node
 )
 
 target_link_libraries(beacon_node
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+  ass2_library
+)
+
+target_link_libraries(beacon_markers_node
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
   ass2_library
