@@ -7,7 +7,7 @@ project(ass2)
 find_package(catkin REQUIRED COMPONENTS
   roscpp rviz
   rospy
-  message_runtime std_msgs sensor_msgs geometry_msgs
+  message_runtime std_msgs sensor_msgs geometry_msgs visualization_msgs
   crosbot_msgs crosbot
   message_generation
   image_transport
@@ -127,6 +127,7 @@ add_library(ass2_library
   src/PolarLegDetection.cpp
   src/image_converter.cpp
   src/beacon.cpp
+  src/PersonTracker.cpp
 )
 
 ## Add cmake target dependencies of the library
@@ -146,7 +147,6 @@ add_executable(beacon_node src/nodes/beacon_node.cpp)
 target_link_libraries(ass2_library
   ${catkin_LIBRARIES}
 )
-
 
 target_link_libraries(person_tracking_node
   ${catkin_LIBRARIES}

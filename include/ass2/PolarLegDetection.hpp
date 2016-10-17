@@ -11,6 +11,7 @@
 
 #include <crosbot/handle.hpp>
 #include <crosbot/geometry/points.hpp>
+#include <crosbot/geometry/poses.hpp>
 
 #include <ros/publisher.h>
 #include <ros/subscriber.h>
@@ -27,6 +28,7 @@ using namespace std;
 class PolarLegDetector {
 private:
 	ros::Subscriber scanSub;
+	ros::Publisher posePub;
 	int debug = true;
 	vector<vector<crosbot::Point2D>> legs;
 	crosbot::Point2D legsCentre;
@@ -37,6 +39,7 @@ public:
 	void callbackScan(const sensor_msgs::LaserScanConstPtr& scan);
 	bool legsDetected();
 	void printPoints(vector<crosbot::Point2D> points);
+	void publishLegsCentre();
 
 };
 
