@@ -15,12 +15,10 @@ int32 maxRow
 */
 
 using namespace cv;
-//ass2::beacon_msg beacon;
 
 beaconMarkers::beaconMarkers()    : it_(nh_) 
 {
-    //tf::StampedTransform transform;
-	time_t timer, start_time; //current time
+	time_t timer; //current time
 	time(&timer); 
       
     double diff = difftime(timer, start_time);
@@ -99,15 +97,5 @@ beaconMarkers::beaconMarkers()    : it_(nh_)
 
 void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
 	beacon = beacon_msg;
-	/*
-	int id = beacon_msg->id;
-	int row = beacon_msg->row;
-	int col = beacon_msg->col;
-	float depth = beacon_msg->depth;
-	std::string topColour = beacon_msg->topColour;
-	std::string bottomColour = beacon_msg->bottomColour;
-	int minRow = beacon_msg->minRow;
-	int maxRow = beacon_msg->maxRow;
-	*/
 }
 
