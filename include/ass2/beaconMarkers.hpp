@@ -14,6 +14,7 @@ private:
 	visualization_msgs::Marker marker;
 	tf::TransformListener tf_listener;
 	tf::StampedTransform transform;
+	time_t start_time;
 
 	ros::Subscriber beacon_sub;
 	ros::Publisher marker_pub;
