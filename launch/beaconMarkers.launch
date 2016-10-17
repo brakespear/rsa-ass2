@@ -2,12 +2,7 @@
 <launch >
     <node pkg="ass2" type="beacon_markers_node" name="beacon_markers_node" output="screen">
         <rosparam>
-            beacons: [
-                { id: 0, top: pink, bottom: green },
-                { id: 1, top: blue, bottom: pink },
-                { id: 2, top: pink, bottom: yellow },
-                { id: 3, top: yellow, bottom: pink }
-            ]
+            
         </rosparam>
     </node>
 </launch>

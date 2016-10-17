@@ -8,7 +8,6 @@
 
 class beaconMarkers {
 private:
-	image_transport::ImageTransport it_;
 	ros::NodeHandle nh_;
 	ass2::beacon_msg beacon;
 	visualization_msgs::Marker marker;

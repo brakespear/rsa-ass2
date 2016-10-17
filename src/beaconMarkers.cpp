@@ -16,15 +16,21 @@ int32 maxRow
 
 using namespace cv;
 
-beaconMarkers::beaconMarkers()    : it_(nh_) 
+beaconMarkers::beaconMarkers()
 {
+
 	time_t timer; //current time
+	time(&start_time);
 	time(&timer); 
       
     double diff = difftime(timer, start_time);
+
     if (diff < (double) 5) {
-		return;
+      std::cout << "diff was 2 small\n";
+		  return;
     }
+    std::cout << "diff was not too small\n";
+
     beacon_sub = nh_.subscribe("/beaconMessage", 100, &beaconMarkers::beacon_callback, this);
 
     marker_pub = nh_.advertise<visualization_msgs::Marker>("/beacons", 1);
@@ -65,8 +71,11 @@ beaconMarkers::beaconMarkers()    : it_(nh_)
 	    time(&start_time);
 
     } else {
+      std::cout << "YOU FUCKED UP LOL\n";
     	return;
     }
+    
+    std::cout << "you didn't fuck up lol\n";
     
     try 
     {
@@ -92,6 +101,7 @@ beaconMarkers::beaconMarkers()    : it_(nh_)
     marker.lifetime = ros::Duration();
     marker.action = visualization_msgs::Marker::ADD;
     
+    std::cout << "put a marker of colour " << marker.ns << " at position " << marker.pose.position.x << " " <<  marker.pose.position.y << " " << marker.pose.position.z << "\n";
     marker_pub.publish(marker);
 }
 
