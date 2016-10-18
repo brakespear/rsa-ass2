@@ -107,7 +107,7 @@ std::vector<int> ImageConverter::getColouredObjectDetectedXY(std::string colour,
 	int objectDetected = 0;
 	int objectX;
 	int objectY;
-	if (oArea>100000) { //change this value to change the distance at which the beacons are detected bigger->closer, smaller->farther 100000 default
+	if (oArea>10000) { //change this value to change the distance at which the beacons are detected bigger->closer, smaller->farther 100000 default
 		objectX = oM10/oArea;
 		objectY = oM01/oArea;
 		objectDetected = 1;
@@ -210,28 +210,6 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg)
 		detectedBeacon.minRow = pinkObjectY;
 		detectedBeacon.maxRow = greenObjectY;
 		*/
-	} else if (/*!blue_pink_beaconPlaced &&*/ blueObjectDetected && pinkObjectDetected && blueObjectY<pinkObjectY) {
-		ROS_INFO("Detected blue top, pink bottom beacon!!!\n");
-		blue_pink_beaconPlaced = true;
-		beaconDetected = true;
-		detectedBeacon = getBeaconByColours("blue","pink");
-		//ass2::beacon_msg beaconMsg;
-		detectedBeacon.beaconMsg.id = detectedBeacon.id;
-		detectedBeacon.beaconMsg.topColour = detectedBeacon.top;
-		detectedBeacon.beaconMsg.bottomColour = detectedBeacon.bottom;
-		detectedBeacon.beaconMsg.col = (blueObjectX+pinkObjectX)/2;
-		detectedBeacon.beaconMsg.row = (blueObjectY+pinkObjectY)/2;
-		detectedBeacon.beaconMsg.minRow = blueObjectY;
-		detectedBeacon.beaconMsg.maxRow = pinkObjectY;
-		detectedBeacon.beaconMsg.depth = 0;
-		beacon_pub.publish(detectedBeacon.beaconMsg);
-		/*
-		beaconDetected = true;
-		detectedBeacon = getBeaconByColours("blue","pink");
-		detectedBeacon.col = (blueObjectX+pinkObjectX)/2;
-		detectedBeacon.minRow = blueObjectY;
-		detectedBeacon.maxRow = pinkObjectY;
-		*/
 	} else if (/*!pink_yellow_beaconPlaced &&*/ yellowObjectDetected && pinkObjectDetected && pinkObjectY<yellowObjectY) {
 		ROS_INFO("Detected pink top, yellow bottom beacon!!!\n");
 		detectedBeacon = getBeaconByColours("pink","yellow");
@@ -254,6 +232,28 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg)
 		detectedBeacon.minRow = pinkObjectY;
 		detectedBeacon.maxRow = yellowObjectY;
 		*/	
+  } else if (/*!blue_pink_beaconPlaced &&*/ blueObjectDetected && pinkObjectDetected && blueObjectY<pinkObjectY) {
+		ROS_INFO("Detected blue top, pink bottom beacon!!!\n");
+		blue_pink_beaconPlaced = true;
+		beaconDetected = true;
+		detectedBeacon = getBeaconByColours("blue","pink");
+		//ass2::beacon_msg beaconMsg;
+		detectedBeacon.beaconMsg.id = detectedBeacon.id;
+		detectedBeacon.beaconMsg.topColour = detectedBeacon.top;
+		detectedBeacon.beaconMsg.bottomColour = detectedBeacon.bottom;
+		detectedBeacon.beaconMsg.col = (blueObjectX+pinkObjectX)/2;
+		detectedBeacon.beaconMsg.row = (blueObjectY+pinkObjectY)/2;
+		detectedBeacon.beaconMsg.minRow = blueObjectY;
+		detectedBeacon.beaconMsg.maxRow = pinkObjectY;
+		detectedBeacon.beaconMsg.depth = 0;
+		beacon_pub.publish(detectedBeacon.beaconMsg);
+		/*
+		beaconDetected = true;
+		detectedBeacon = getBeaconByColours("blue","pink");
+		detectedBeacon.col = (blueObjectX+pinkObjectX)/2;
+		detectedBeacon.minRow = blueObjectY;
+		detectedBeacon.maxRow = pinkObjectY;
+		*/
 	}
 	
 }

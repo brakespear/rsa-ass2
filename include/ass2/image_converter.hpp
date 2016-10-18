@@ -39,7 +39,7 @@
 #define GREEN_LOW_VAL 0 //70
 #define GREEN_HIGH_VAL 255 //110
 
-#define BLUE_LOW_HUE 122 //100//75
+#define BLUE_LOW_HUE 100 //122 //100//75
 #define BLUE_HIGH_HUE 135 //130//130
 #define BLUE_LOW_SAT 0 //125
 #define BLUE_HIGH_SAT 255 //150

@@ -14,26 +14,38 @@ int32 minRow
 int32 maxRow
 */
 
-using namespace cv;
+//using namespace cv;
 
 beaconMarkers::beaconMarkers()
 {
+  beacon_sub = nh_.subscribe("/beaconMessage", 100, &beaconMarkers::beacon_callback, this);
 
-	time_t timer; //current time
-	time(&start_time);
+  marker_pub = nh_.advertise<visualization_msgs::Marker>("/beacons", 1);
+  
+  //time(&start_time);
+  //std::cout << "start time is " << start_time << "\n";
+	
+}
+
+void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
+	beacon = beacon_msg;
+	
+	/*time_t timer; //current time
 	time(&timer); 
+	std::cout << "current time is " << timer << " and start time is " << start_time << "\n";
       
     double diff = difftime(timer, start_time);
 
     if (diff < (double) 5) {
-      std::cout << "diff was 2 small\n";
+      std::cout << "diff was 2 small, it is " << diff << "\n";
 		  return;
     }
-    std::cout << "diff was not too small\n";
+    std::cout << "diff was not too small\n";*/
+    
+    tf::StampedTransform transform;
+    visualization_msgs::Marker marker;
 
-    beacon_sub = nh_.subscribe("/beaconMessage", 100, &beaconMarkers::beacon_callback, this);
-
-    marker_pub = nh_.advertise<visualization_msgs::Marker>("/beacons", 1);
+    
 
     marker.header.frame_id="base_link";
     marker.header.stamp = ros::Time();
@@ -44,7 +56,7 @@ beaconMarkers::beaconMarkers()
 	    marker.color.r = 1.0;
 	    marker.color.g = 0.0;
 	    marker.color.b = 0.75;
-    	time(&start_time);
+    	//time(&start_time);
 
     } else if (beacon.bottomColour == "green") {
 	    marker.id = beacon.id;
@@ -52,7 +64,7 @@ beaconMarkers::beaconMarkers()
 	    marker.color.r =0.0;
 	    marker.color.g = 1.0;
 	    marker.color.b = 0.0;
-    	time(&start_time);
+    	//time(&start_time);
 
     } else if (beacon.bottomColour == "yellow") {
 	    marker.id = beacon.id;
@@ -60,7 +72,7 @@ beaconMarkers::beaconMarkers()
 	    marker.color.r =0.0;
 	    marker.color.g = 1.0;
 	    marker.color.b = 1.0;
-	    time(&start_time);
+	    //time(&start_time);
 
     }else if (beacon.topColour == "blue") {
 	    marker.id = beacon.id;
@@ -68,7 +80,7 @@ beaconMarkers::beaconMarkers()
 	    marker.color.r = 0.0;
 	    marker.color.g = 0.0;
 	    marker.color.b = 1.0;
-	    time(&start_time);
+	    //time(&start_time);
 
     } else {
       std::cout << "YOU FUCKED UP LOL\n";
@@ -81,9 +93,9 @@ beaconMarkers::beaconMarkers()
     {
 		tf_listener.lookupTransform("/map", "/base_link", ros::Time(0), transform);
 
-		marker.pose.position.x = beacon.col;
-		marker.pose.position.y = beacon.row;
-		marker.pose.position.z = beacon.depth;
+		marker.pose.position.x = transform.getOrigin().x();
+    marker.pose.position.y = transform.getOrigin().y();
+    marker.pose.position.z = transform.getOrigin().z();
     }
     catch (tf::TransformException ex) {
     	ROS_ERROR("Nope! %s\n", ex.what());
@@ -103,9 +115,5 @@ beaconMarkers::beaconMarkers()
     
     std::cout << "put a marker of colour " << marker.ns << " at position " << marker.pose.position.x << " " <<  marker.pose.position.y << " " << marker.pose.position.z << "\n";
     marker_pub.publish(marker);
-}
-
-void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
-	beacon = beacon_msg;
 }
 

@@ -10,9 +10,9 @@ class beaconMarkers {
 private:
 	ros::NodeHandle nh_;
 	ass2::beacon_msg beacon;
-	visualization_msgs::Marker marker;
+	//visualization_msgs::Marker marker;
 	tf::TransformListener tf_listener;
-	tf::StampedTransform transform;
+	//tf::StampedTransform transform;
 	time_t start_time;
 
 	ros::Subscriber beacon_sub;
