@@ -99,7 +99,7 @@ void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
     }
     
     marker.id = beacon_msg.id;
-    topmarker.id = beacon_msg.id;
+    topmarker.id = beacon_msg.id+4;
     std::cout << "you didn't fuck up lol\n";
     
     try 
@@ -156,7 +156,7 @@ void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
     topmarker.lifetime = ros::Duration();
     topmarker.action = visualization_msgs::Marker::ADD;
     
-    std::cout << "put a marker of colour " << topmarker.ns << " at position " << topmarker.pose.position.x << " " <<  topmarker.pose.position.y << " " << topmarker.pose.position.z << "\n";
+    std::cout << "put a top marker of colour " << topmarker.ns << " at position " << topmarker.pose.position.x << " " <<  topmarker.pose.position.y << " " << topmarker.pose.position.z << "\n";
     marker_pub.publish(topmarker);
 }
 
