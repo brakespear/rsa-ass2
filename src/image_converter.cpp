@@ -180,7 +180,7 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg)
 		detectedBeacon.beaconMsg.minRow = yellowObjectY;
 		detectedBeacon.beaconMsg.maxRow = pinkObjectY;
 		detectedBeacon.beaconMsg.depth = 0;
-		beacon_pub.publish(detectedBeacon.beaconMsg);
+		//beacon_pub.publish(detectedBeacon.beaconMsg);
 		/*
 		beaconDetected = true;
 		detectedBeacon = getBeaconByColours("yellow","pink");
@@ -202,7 +202,7 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg)
 		detectedBeacon.beaconMsg.minRow = pinkObjectY;
 		detectedBeacon.beaconMsg.maxRow = greenObjectY;
 		detectedBeacon.beaconMsg.depth = 0;
-		beacon_pub.publish(detectedBeacon.beaconMsg);
+		//beacon_pub.publish(detectedBeacon.beaconMsg);
 		/*
 		beaconDetected = true;
 		detectedBeacon = getBeaconByColours("pink","green");
@@ -224,7 +224,7 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg)
 		detectedBeacon.beaconMsg.minRow = pinkObjectY;
 		detectedBeacon.beaconMsg.maxRow = yellowObjectY;
 		detectedBeacon.beaconMsg.depth = 0;
-		beacon_pub.publish(detectedBeacon.beaconMsg);
+		//beacon_pub.publish(detectedBeacon.beaconMsg);
 		/*
 		beaconDetected = true;
 		detectedBeacon = getBeaconByColours("pink","yellow");
@@ -246,7 +246,7 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg)
 		detectedBeacon.beaconMsg.minRow = blueObjectY;
 		detectedBeacon.beaconMsg.maxRow = pinkObjectY;
 		detectedBeacon.beaconMsg.depth = 0;
-		beacon_pub.publish(detectedBeacon.beaconMsg);
+		//beacon_pub.publish(detectedBeacon.beaconMsg);
 		/*
 		beaconDetected = true;
 		detectedBeacon = getBeaconByColours("blue","pink");
