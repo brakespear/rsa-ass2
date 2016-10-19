@@ -346,14 +346,16 @@ void ImageConverter::depth_callback(const sensor_msgs::ImageConstPtr& depthMsg) 
             beaconDepth = totalDepth;
         }
 		    ROS_INFO("Depth calculated as %.2f\n",beaconDepth);
-		    ass2::beacon_msg beaconMsg;
-		    beaconMsg.id = detectedBeacon.id;
-		    beaconMsg.topColour = detectedBeacon.top;
-		    beaconMsg.bottomColour = detectedBeacon.bottom;
-		    beaconMsg.col = detectedBeacon.beaconMsg.col;
-		    beaconMsg.row = (detectedBeacon.beaconMsg.minRow+detectedBeacon.beaconMsg.maxRow)/2;
-		    beaconMsg.depth = beaconDepth;
-		    beacon_pub.publish(beaconMsg);
+		    if (beaconDepth) {
+  		    ass2::beacon_msg beaconMsg;
+  		    beaconMsg.id = detectedBeacon.id;
+  		    beaconMsg.topColour = detectedBeacon.top;
+  		    beaconMsg.bottomColour = detectedBeacon.bottom;
+  		    beaconMsg.col = detectedBeacon.beaconMsg.col;
+  		    beaconMsg.row = (detectedBeacon.beaconMsg.minRow+detectedBeacon.beaconMsg.maxRow)/2;
+  		    beaconMsg.depth = beaconDepth;
+  		    beacon_pub.publish(beaconMsg);
+		    }
 		    beaconDetected = false;
 	  } else if (!beaconDetected) {
 		    ROS_WARN("Depth not requested\n");
