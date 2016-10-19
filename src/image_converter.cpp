@@ -353,7 +353,7 @@ void ImageConverter::depth_callback(const sensor_msgs::ImageConstPtr& depthMsg) 
   		    beaconMsg.bottomColour = detectedBeacon.bottom;
   		    beaconMsg.col = detectedBeacon.beaconMsg.col;
   		    beaconMsg.row = (detectedBeacon.beaconMsg.minRow+detectedBeacon.beaconMsg.maxRow)/2;
-  		    beaconMsg.depth = beaconDepth;
+  		    beaconMsg.depth = beaconDepth - 0.1;
   		    beacon_pub.publish(beaconMsg);
 		    }
 		    beaconDetected = false;

@@ -8,6 +8,7 @@
 #include <cmath>
 
 #define PI 3.14159265
+#define CENTRE_COLUMN 317
 
 class beaconMarkers {
 private:
@@ -20,6 +21,11 @@ private:
 
 	ros::Subscriber beacon_sub;
 	ros::Publisher marker_pub;
+	
+	int yellowPinkMostCentre = 1000;
+	int pinkYellowMostCentre = 1000;
+	int bluePinkMostCentre = 1110;
+	int pinkGreenMostCentre = 1000;
 	
 	double calculateAngle(int column);
 
