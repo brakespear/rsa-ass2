@@ -11,7 +11,7 @@
 
 #include <ass2/PersonTracker.hpp>
 
-#define MAX_SPEED 0.3
+#define MAX_SPEED 0.5
 #define MAX_TURN 3
 
 
@@ -25,24 +25,27 @@ PersonTracker::PersonTracker() {
 void PersonTracker::legsCentrePoseCb(const geometry_msgs::PoseConstPtr& legsCentrePose) {
 	float centre_x = legsCentrePose->position.x;
 	float centre_y = legsCentrePose->position.y;
-	ROS_INFO("Legs centre at (%.2f,%.2f)\n",centre_x,centre_y);
+	//ROS_INFO("Legs centre at (%.2f,%.2f)\n",centre_x,centre_y);
 	//the y coordinate determines how much to turn left (+ve y) or right (-ve y)
 	geometry_msgs::Twist t;
 	t.linear.y = t.linear.z = 0;
-	if (centre_x<0.35) {
+	// stop the robot when it catches up to the person
+	if (centre_x<0.55) {
 		t.linear.x = 0;
+		t.angular.z = 0;
 	} else {
 		t.linear.x = sqrt((centre_x)/4.0) *MAX_SPEED;
+		t.angular.z = centre_y * MAX_TURN;
 	}
 	t.angular.x = t.angular.y = 0;
-	t.angular.z = centre_y * MAX_TURN; //might need to invert the sign
+	// restrict the max turn speed to avoid wild spins
 	if (t.angular.z>2) {
 		t.angular.z = 2.0;
 	} else if (t.angular.z<-2.0) {
 		t.angular.z = -2.0;
 	}
 	publishMarker(*legsCentrePose);
-	ROS_INFO("Publishing velocity %.2f forward %.2f turn\n",t.linear.x,t.angular.z);
+	//ROS_INFO("Publishing velocity %.2f forward %.2f turn\n",t.linear.x,t.angular.z);
 	drivePub.publish(t);
 }
 
