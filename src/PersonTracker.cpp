@@ -11,7 +11,7 @@
 
 #include <ass2/PersonTracker.hpp>
 
-#define MAX_SPEED 0.5
+#define MAX_SPEED 0.8 //0.5
 #define MAX_TURN 3
 
 
@@ -19,13 +19,12 @@ PersonTracker::PersonTracker() {
 	ros::NodeHandle n;
 	poseSub = n.subscribe<geometry_msgs::Pose>("legsCentre",1,&PersonTracker::legsCentrePoseCb,this);
 	drivePub = n.advertise< geometry_msgs::Twist >("cmd_vel_mux/input/navi", 1, false);
-	markerPub = n.advertise< visualization_msgs::Marker >("destination",1,false);
 }
 
 void PersonTracker::legsCentrePoseCb(const geometry_msgs::PoseConstPtr& legsCentrePose) {
 	float centre_x = legsCentrePose->position.x;
 	float centre_y = legsCentrePose->position.y;
-	//ROS_INFO("Legs centre at (%.2f,%.2f)\n",centre_x,centre_y);
+	ROS_INFO("Legs centre at (%.2f,%.2f)\n",centre_x,centre_y);
 	//the y coordinate determines how much to turn left (+ve y) or right (-ve y)
 	geometry_msgs::Twist t;
 	t.linear.y = t.linear.z = 0;
@@ -44,23 +43,8 @@ void PersonTracker::legsCentrePoseCb(const geometry_msgs::PoseConstPtr& legsCent
 	} else if (t.angular.z<-2.0) {
 		t.angular.z = -2.0;
 	}
-	publishMarker(*legsCentrePose);
-	//ROS_INFO("Publishing velocity %.2f forward %.2f turn\n",t.linear.x,t.angular.z);
+	ROS_INFO("Publishing velocity %.2f forward %.2f turn\n",t.linear.x,t.angular.z);
 	drivePub.publish(t);
-}
-
-void PersonTracker::publishMarker(const geometry_msgs::Pose legsCentre) {
-	visualization_msgs::Marker dest;
-	dest.header.stamp = ros::Time::now();
-	dest.header.frame_id = "base_link"; //this might need to be changed
-	dest.id = 5;
-	dest.type = 2; // sphere
-	dest.action = 0; // add/modify
-	dest.pose = legsCentre;
-	dest.color.r = 1.0;
-	dest.color.g = dest.color.b = 0.0;
-	dest.lifetime = ros::Duration(0);
-	markerPub.publish(dest);
 }
 
 

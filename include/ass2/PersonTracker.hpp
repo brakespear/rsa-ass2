@@ -15,19 +15,15 @@
 #include <ros/subscriber.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Twist.h>
-#include <visualization_msgs/Marker.h>
-
 
 class PersonTracker{
 private:
 	ros::Subscriber poseSub;
 	ros::Publisher drivePub;
-	ros::Publisher markerPub;
 public:
 	PersonTracker();
 	virtual ~PersonTracker() {};
 	void legsCentrePoseCb(const geometry_msgs::PoseConstPtr& legsCentrePose);
-	void publishMarker(const geometry_msgs::Pose legsCentre);
 };
 
 #endif

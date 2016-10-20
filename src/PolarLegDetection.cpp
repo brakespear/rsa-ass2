@@ -46,12 +46,12 @@ void PolarLegDetector::callbackScan(const sensor_msgs::LaserScanConstPtr& scan) 
 	float prevValidRange = INF;
 	float currRange;
 	//float rangeDelta; //code now uses euclidean distance not range delta
-	int legIndex = -1;
+	int legIndex = 0;
 	crosbot::Point2D currPoint;
 	crosbot::Point2D prevValidPoint = crosbot::Point2D(1000.0,1000.0);;
     for (int n = 0; n < scan->ranges.size(); ++n, angle += scan->angle_increment) {
 		currRange = scan->ranges[n];
-		cout << "Polar={"<<currRange<<","<<angle<<"} cartesian = ["<<cos(angle) * scan->ranges[n]<<","<< sin(angle) * scan->ranges[n]<<"]\n";
+		//cout << "Polar={"<<currRange<<","<<angle<<"} cartesian = ["<<cos(angle) * scan->ranges[n]<<","<< sin(angle) * scan->ranges[n]<<"]\n";
 		if (currRange>0 && currRange<INF) {
 			//rangeDelta = abs(prevValidRange-currRange);
 			// valid point so create point
@@ -135,8 +135,8 @@ void PolarLegDetector::callbackScan(const sensor_msgs::LaserScanConstPtr& scan) 
 		legs[1].clear();
 	}
 
-	cout << "Legs centre at |" << legsCentre.x << "," << legsCentre.y << endl;
-	cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n";
+	//cout << "Legs centre at |" << legsCentre.x << "," << legsCentre.y << endl;
+	//cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n";
 
 	debug = false;
 	publishLegsCentre();
