@@ -46,8 +46,11 @@ void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
     visualization_msgs::Marker topmarker;
     
 
-    marker.header.frame_id="/map";
+    marker.header.frame_id="map";
     marker.header.stamp = ros::Time::now();
+    
+    topmarker.header.frame_id="map";
+    topmarker.header.stamp = ros::Time::now();
     
     if (beacon_msg.bottomColour == "pink" && beacon_msg.topColour == "yellow") {
 	    marker.ns = "pink";
@@ -59,6 +62,15 @@ void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
 	    topmarker.color.r = 1.0;
 	    topmarker.color.g = 1.0;
 	    topmarker.color.b = 0.0;
+	    
+	    int diff = abs(CENTRE_COLUMN - beacon_msg.col);
+	    if (diff > yellowPinkMostCentre) {
+	      std::cout << "diff was bigger, returning\n";
+	      return;
+	    } else {
+	      yellowPinkMostCentre = diff;
+	      std::cout << "diff was smaller, most centre is now " << diff << "\n";
+	    }
 
     } else if (beacon_msg.bottomColour == "green" && beacon_msg.topColour == "pink") {
 	    marker.ns = "green";
@@ -70,6 +82,13 @@ void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
 	    topmarker.color.r = 1.0;
 	    topmarker.color.g = 0.0;
 	    topmarker.color.b = 0.75;
+	    
+	    int diff = abs(CENTRE_COLUMN - beacon_msg.col);
+	    if (diff > pinkGreenMostCentre) {
+	      return;
+	    } else {
+	      pinkGreenMostCentre = diff;
+	    }
 
     } else if (beacon_msg.bottomColour == "yellow" && beacon_msg.topColour == "pink") {
 	    marker.ns = "yellow";
@@ -81,6 +100,13 @@ void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
 	    topmarker.color.r = 1.0;
 	    topmarker.color.g = 0.0;
 	    topmarker.color.b = 0.75;
+	    
+	    int diff = abs(CENTRE_COLUMN - beacon_msg.col);
+	    if (diff > pinkYellowMostCentre) {
+	      return;
+	    } else {
+	      pinkYellowMostCentre = diff;
+	    }
 
     }else if (beacon_msg.bottomColour == "pink" && beacon_msg.topColour == "blue") {
 	    marker.ns = "pink";
@@ -92,6 +118,13 @@ void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
 	    topmarker.color.r = 0.0;
 	    topmarker.color.g = 0.0;
 	    topmarker.color.b = 1.0;
+	    
+	    int diff = abs(CENTRE_COLUMN - beacon_msg.col);
+	    if (diff > bluePinkMostCentre) {
+	      return;
+	    } else {
+	      bluePinkMostCentre = diff;
+	    }
 
     } else {
       std::cout << "YOU FUCKED UP LOL\n";
@@ -99,7 +132,7 @@ void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
     }
     
     marker.id = beacon_msg.id;
-    topmarker.id = beacon_msg.id+4;
+    topmarker.id = beacon_msg.id + 4;
     std::cout << "you didn't fuck up lol\n";
     
     try 
@@ -107,23 +140,24 @@ void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
       tf_listener.lookupTransform("/map", "/base_link", ros::Time(0), transform);
       std::cout << "transform worked\n";
 
-      double angle = cos(transform.getRotation().getAngle());
-      std::cout << "calculated cos angle is " << angle << "\n";
+      double cosAngle = cos(tf::getYaw(transform.getRotation()));
+      std::cout << "calculated cos angle is " << cosAngle << "\n";
+      
+      double sinAngle = sin(tf::getYaw(transform.getRotation()));
+      std::cout << "calculated sin angle is " << sinAngle << "\n";
+		 
 		  
-      angle = sin(transform.getRotation().getAngle());
-      std::cout << "calculated sin angle is " << angle << "\n";
-		  
-      marker.pose.position.x = transform.getOrigin().x() + beacon_msg.depth * angle;
-      marker.pose.position.y = transform.getOrigin().y() + beacon_msg.depth * angle;
-      marker.pose.position.z = transform.getOrigin().z();
+      marker.pose.position.x = transform.getOrigin().x() + beacon_msg.depth * cosAngle;     
+      marker.pose.position.y = transform.getOrigin().y() + beacon_msg.depth * sinAngle;
+      marker.pose.position.z = 0.2;
       marker.pose.orientation.x = 0.0;
       marker.pose.orientation.y = 0.0;
       marker.pose.orientation.z = 0.0;
       marker.pose.orientation.w = 1.0;
 
-      topmarker.pose.position.x = transform.getOrigin().x() + beacon_msg.depth * angle;
-      topmarker.pose.position.y = transform.getOrigin().y() + beacon_msg.depth * angle;
-      topmarker.pose.position.z = transform.getOrigin().z() + 0.3;
+      topmarker.pose.position.x = transform.getOrigin().x() + beacon_msg.depth * cosAngle;
+      topmarker.pose.position.y = transform.getOrigin().y() + beacon_msg.depth * sinAngle;
+      topmarker.pose.position.z = 0.5;
       topmarker.pose.orientation.x = 0.0;
       topmarker.pose.orientation.y = 0.0;
       topmarker.pose.orientation.z = 0.0;
