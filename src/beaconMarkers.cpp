@@ -194,9 +194,3 @@ void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
     marker_pub.publish(topmarker);
 }
 
-double beaconMarkers::calculateAngle(int column) {
-  double ret = column/(500.0/180.0) - 90.0;
-  std::cout << "raw angle is " << ret << "\n";
-  return ret;
-}
-

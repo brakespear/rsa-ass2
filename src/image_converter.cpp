@@ -7,12 +7,10 @@ using namespace cv;
 
 ImageConverter::ImageConverter()    : it_(nh_) 
 {
-  ROS_INFO("hello\n");
   // Subscribe to depth and colour images
 	depth_sub = nh_.subscribe("/camera/depth/image_rect", 1, &ImageConverter::depth_callback, this);
   image_sub_ = it_.subscribe("/camera/rgb/image_color", 1, &ImageConverter::imageCb, this);
 	beacon_pub = nh_.advertise<ass2::beacon_msg>("beaconMessage",100);
-	//beacon_placed_sub = nh_.subscribe("beaconMessage_return",1, &ImageConverter::beaconCb,this);
 	pink_binary_pub = it_.advertise("/pink/image/binary",1);
 	yellow_binary_pub = it_.advertise("/yellow/image/binary",1);
 	green_binary_pub = it_.advertise("/green/image/binary",1);
@@ -29,7 +27,13 @@ ImageConverter::~ImageConverter()
 }
 
 
-// helper function
+/*
+ * This function performs colour blob detection in an HSV image
+ * It searches for the colour specified
+ * And returns a vector of ints where the first int is 0 1 if the colour is detected in the image
+ * And the subsequent 2 are the (x,y) coordinates of the centre of the coloured blob
+ * Otherwise the first int is 0 if no blobs of that colour are detected
+*/
 std::vector<int> ImageConverter::getColouredObjectDetectedXY(std::string colour, std_msgs::Header header, Mat hsvImage) {
 	// Find coloured object
 	Mat colouredImg;
@@ -73,15 +77,16 @@ std::vector<int> ImageConverter::getColouredObjectDetectedXY(std::string colour,
 		
 		
 	// Look within given hue, saturation and value range
+	// The in range function converts the colour->1 and everything else->0, thus creating a binary image
 	inRange(hsvImage, Scalar(lowHue,lowSat,lowVal), Scalar(highHue,highSat,highVal),colouredImg);
 	//morphological opening (remove small objects from the foreground)
   	erode(colouredImg, colouredImg, getStructuringElement(MORPH_ELLIPSE, Size(25, 25)) );
   	dilate( colouredImg, colouredImg, getStructuringElement(MORPH_ELLIPSE, Size(25, 25)) ); 
 
-  //morphological closing (fill small holes in the foreground)
+    //morphological closing (fill small holes in the foreground)
 	dilate( colouredImg, colouredImg, getStructuringElement(MORPH_ELLIPSE, Size(25, 25)) ); 
 	erode(colouredImg, colouredImg, getStructuringElement(MORPH_ELLIPSE, Size(25, 25)) );
-	//publish the colour search binary image
+	//publish the colour search binary image (for debugging purposes)
 	cv_bridge::CvImage binary_msg;
 	binary_msg.header   = header; 
 	binary_msg.encoding = sensor_msgs::image_encodings::MONO8; 
@@ -98,6 +103,8 @@ std::vector<int> ImageConverter::getColouredObjectDetectedXY(std::string colour,
 		ROS_ERROR("Invalid colour search string\n");
 	}
 	
+
+	// Use moments to find the (x,y) coorindate of the centre of a coloured blob
 	Moments objectMoments = moments(colouredImg);
 	
 	double oM01 = objectMoments.m01;
@@ -111,9 +118,6 @@ std::vector<int> ImageConverter::getColouredObjectDetectedXY(std::string colour,
 		objectX = oM10/oArea;
 		objectY = oM01/oArea;
 		objectDetected = 1;
-		//ROS_INFO("Detected %s\n", colour.c_str());
-	//} else {
-	  //ROS_INFO("didn't detect %s\n", colour.c_str());
 	}
 	std::vector<int> result;
 	result.push_back(objectDetected);
@@ -122,7 +126,13 @@ std::vector<int> ImageConverter::getColouredObjectDetectedXY(std::string colour,
 	return result;
 }
 
-
+/*
+ * Colour kinect image callback
+ * Searches for coloured blobs and then compares the positions of pair of coloured blobs
+ * To see if they form a beacon.
+ * If a beacon is detected, its details are filled out to be used by the depth callback before
+ * Publishing the beacon message for placement into the map
+*/
 void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg)
 {
     cv_bridge::CvImagePtr cv_ptr;
@@ -163,15 +173,13 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg)
 	int blueObjectX = blueObjectDetails.at(1);
 	int blueObjectY = blueObjectDetails.at(2);
 	
-	/* In the following section the commented out code was used when we were getting the depth of the beacon
-	   This code worked but unfortuntely we were unable to use the depth to place the beacon on the map
-	*/
-	if (/*!yellow_pink_beaconPlaced &&*/ yellowObjectDetected && pinkObjectDetected && yellowObjectY<pinkObjectY) {
+	// Search for pairs of blobs that might form beacons
+    // By checking the existance of coloured blobs and their relative vertical position
+	if (yellowObjectDetected && pinkObjectDetected && yellowObjectY<pinkObjectY) {
 		ROS_INFO("Detected yellow top, pink bottom beacon!!!\n");
 		yellow_pink_beaconPlaced = true;
 		beaconDetected = true;
 		detectedBeacon = getBeaconByColours("yellow","pink");
-		//ass2::beacon_msg beaconMsg;
 		detectedBeacon.beaconMsg.id = detectedBeacon.id;
 		detectedBeacon.beaconMsg.topColour = detectedBeacon.top;
 		detectedBeacon.beaconMsg.bottomColour = detectedBeacon.bottom;
@@ -180,20 +188,11 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg)
 		detectedBeacon.beaconMsg.minRow = yellowObjectY;
 		detectedBeacon.beaconMsg.maxRow = pinkObjectY;
 		detectedBeacon.beaconMsg.depth = 0;
-		//beacon_pub.publish(detectedBeacon.beaconMsg);
-		/*
-		beaconDetected = true;
-		detectedBeacon = getBeaconByColours("yellow","pink");
-		detectedBeacon.col = (yellowObjectX+pinkObjectX)/2;
-		detectedBeacon.minRow = yellowObjectY;
-		detectedBeacon.maxRow = pinkObjectY;
-		*/
-	} else if (/*!pink_green_beaconPlaced &&*/ greenObjectDetected && pinkObjectDetected && pinkObjectY<greenObjectY) {
+	} else if (greenObjectDetected && pinkObjectDetected && pinkObjectY<greenObjectY) {
 		ROS_INFO("Detected pink top, green bottom beacon!!!\n");
 		pink_green_beaconPlaced = true;
 		beaconDetected = true;
 		detectedBeacon = getBeaconByColours("pink","green");
-		//ass2::beacon_msg beaconMsg;
 		detectedBeacon.beaconMsg.id = detectedBeacon.id;
 		detectedBeacon.beaconMsg.topColour = detectedBeacon.top;
 		detectedBeacon.beaconMsg.bottomColour = detectedBeacon.bottom;
@@ -202,20 +201,11 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg)
 		detectedBeacon.beaconMsg.minRow = pinkObjectY;
 		detectedBeacon.beaconMsg.maxRow = greenObjectY;
 		detectedBeacon.beaconMsg.depth = 0;
-		//beacon_pub.publish(detectedBeacon.beaconMsg);
-		/*
-		beaconDetected = true;
-		detectedBeacon = getBeaconByColours("pink","green");
-		detectedBeacon.col = (greenObjectX+pinkObjectX)/2;
-		detectedBeacon.minRow = pinkObjectY;
-		detectedBeacon.maxRow = greenObjectY;
-		*/
-	} else if (/*!pink_yellow_beaconPlaced &&*/ yellowObjectDetected && pinkObjectDetected && pinkObjectY<yellowObjectY) {
+	} else if (yellowObjectDetected && pinkObjectDetected && pinkObjectY<yellowObjectY) {
 		ROS_INFO("Detected pink top, yellow bottom beacon!!!\n");
 		detectedBeacon = getBeaconByColours("pink","yellow");
 		pink_yellow_beaconPlaced = true;
 		beaconDetected = true;
-		//comp3431_starter::beacon_msg beaconMsg;
 		detectedBeacon.beaconMsg.id = detectedBeacon.id;
 		detectedBeacon.beaconMsg.topColour = detectedBeacon.top;
 		detectedBeacon.beaconMsg.bottomColour = detectedBeacon.bottom;
@@ -224,20 +214,11 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg)
 		detectedBeacon.beaconMsg.minRow = pinkObjectY;
 		detectedBeacon.beaconMsg.maxRow = yellowObjectY;
 		detectedBeacon.beaconMsg.depth = 0;
-		//beacon_pub.publish(detectedBeacon.beaconMsg);
-		/*
-		beaconDetected = true;
-		detectedBeacon = getBeaconByColours("pink","yellow");
-		detectedBeacon.col = (yellowObjectX+pinkObjectX)/2;
-		detectedBeacon.minRow = pinkObjectY;
-		detectedBeacon.maxRow = yellowObjectY;
-		*/	
-  } else if (/*!blue_pink_beaconPlaced &&*/ blueObjectDetected && pinkObjectDetected && blueObjectY<pinkObjectY) {
+  } else if (blueObjectDetected && pinkObjectDetected && blueObjectY<pinkObjectY) {
 		ROS_INFO("Detected blue top, pink bottom beacon!!!\n");
 		blue_pink_beaconPlaced = true;
 		beaconDetected = true;
 		detectedBeacon = getBeaconByColours("blue","pink");
-		//ass2::beacon_msg beaconMsg;
 		detectedBeacon.beaconMsg.id = detectedBeacon.id;
 		detectedBeacon.beaconMsg.topColour = detectedBeacon.top;
 		detectedBeacon.beaconMsg.bottomColour = detectedBeacon.bottom;
@@ -246,18 +227,13 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg)
 		detectedBeacon.beaconMsg.minRow = blueObjectY;
 		detectedBeacon.beaconMsg.maxRow = pinkObjectY;
 		detectedBeacon.beaconMsg.depth = 0;
-		//beacon_pub.publish(detectedBeacon.beaconMsg);
-		/*
-		beaconDetected = true;
-		detectedBeacon = getBeaconByColours("blue","pink");
-		detectedBeacon.col = (blueObjectX+pinkObjectX)/2;
-		detectedBeacon.minRow = blueObjectY;
-		detectedBeacon.maxRow = pinkObjectY;
-		*/
 	}
 	
 }
 
+/*
+ * Returns a beacon object with the given top and botton colour
+*/
 Beacon ImageConverter::getBeaconByColours(std::string top, std::string bottom) {
 	Beacon thisBeacon;
 	for (int i=0; i<beaconsList.size(); i++) {
@@ -270,6 +246,9 @@ Beacon ImageConverter::getBeaconByColours(std::string top, std::string bottom) {
 }
 
 
+/*
+ * Helper function for printing HSV values of a section of an image
+*/
 void printCalibrationValuesGrid(cv::Mat hsvImage, std::string hsv, int startRow, int startCol, int width, int height) {
 	int index;
 	if (hsv=="hue") {
@@ -295,30 +274,15 @@ void printCalibrationValuesGrid(cv::Mat hsvImage, std::string hsv, int startRow,
 		}
 	}
 	std::cout << "]" << std::endl;
-}
+}		
 
-/* This callback function and its topic would have been used to continually publish beacon messages
-   While centering the beacon in the image before placing it onto the map
-	*/
 /*
-void ImageConverter::beaconCb(const comp3431_starter::beacon_msgPtr& beaconPlaced) {
-	if (beaconPlaced->id == 0) {
-		yellow_pink_beaconPlaced = true;
-	} else if (beaconPlaced->id == 1) {
-		pink_green_beaconPlaced = true;
-	} else if (beaconPlaced->id == 2) {
-		blue_pink_beaconPlaced = true;
-	} else if (beaconPlaced->id == 3) {
-		pink_yellow_beaconPlaced = true;
-	} else {
-		ROS_ERROR("Invalid beacon ID returned\n");
-	}
-}
-*/		
-		
-				
-
-
+ * Callback function for the kinect depth image
+ * Calculates the depth of a beacon (if one is detected)
+ * By averaging a vertical slice of depths down the centre of the beacon
+ * This depth is then published along with other information
+ * To be used to place the beacon in the map
+*/
 void ImageConverter::depth_callback(const sensor_msgs::ImageConstPtr& depthMsg) {
     if (depthMsg->encoding == sensor_msgs::image_encodings::TYPE_32FC1 && beaconDetected) {
 		    ROS_INFO("Depth slice requested for column %d from row %d to %d\n",detectedBeacon.beaconMsg.col,detectedBeacon.beaconMsg.minRow,detectedBeacon.beaconMsg.maxRow);
@@ -328,12 +292,9 @@ void ImageConverter::depth_callback(const sensor_msgs::ImageConstPtr& depthMsg) 
 		    float depth;
 		    int i = 0;
 		    while (i<=numberOfRows) {
-		        //ROS_INFO("in the loop\n");
 			      depth = *reinterpret_cast<const float*>(&depthMsg->data[index]);
-			      //ROS_INFO("depth is %2f\n", depth);	
 			      if (depth>=MIN_DEPTH && depth<=MAX_DEPTH) {
 				        totalDepth+=depth;
-				        //ROS_INFO("in the if\n");
 			      }
 			      i++;
 			      index+=depthMsg->step; //shift down 1 row
@@ -364,12 +325,3 @@ void ImageConverter::depth_callback(const sensor_msgs::ImageConstPtr& depthMsg) 
     }
 }
 
-
-
-/*int main(int argc, char** argv)
-{
-	ros::init(argc, argv, "image_converter");
-	ImageConverter ic;
-	ros::spin();
-	return 0;
-}*/

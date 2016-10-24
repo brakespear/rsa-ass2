@@ -13,10 +13,7 @@
 class beaconMarkers {
 private:
 	ros::NodeHandle nh_;
-	//ass2::beacon_msg beacon;
-	//visualization_msgs::Marker marker;
 	tf::TransformListener tf_listener;
-	//tf::StampedTransform transform;
 	time_t start_time;
 
 	ros::Subscriber beacon_sub;
@@ -27,7 +24,6 @@ private:
 	int bluePinkMostCentre = 1110;
 	int pinkGreenMostCentre = 1000;
 	
-	double calculateAngle(int column);
 
 public:
 	beaconMarkers();
