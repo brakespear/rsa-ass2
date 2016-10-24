@@ -21,6 +21,13 @@ PersonTracker::PersonTracker() {
 	drivePub = n.advertise< geometry_msgs::Twist >("cmd_vel_mux/input/navi", 1, false);
 }
 
+/* 
+ * Publish a twist message to navigate the robot
+ * To the legs centre determined by the leg detection
+ * Utilises a basic knowledge of the coordinate frame of the laser scanner
+ * Where the x axis extends in front of the robot and the y axis left/right
+ * Includes safety features to stop the robot hitting the person, or spinning out of control
+*/
 void PersonTracker::legsCentrePoseCb(const geometry_msgs::PoseConstPtr& legsCentrePose) {
 	float centre_x = legsCentrePose->position.x;
 	float centre_y = legsCentrePose->position.y;
