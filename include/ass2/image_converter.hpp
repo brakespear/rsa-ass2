@@ -61,22 +61,17 @@ private:
 	image_transport::Publisher blue_binary_pub;
 	image_transport::Subscriber image_sub_;
 	ros::Subscriber depth_sub;
-	ros::Publisher beacon_pub;
-	//ros::Subscriber beacon_placed_sub;
-	bool pink_yellow_beaconPlaced = false;
-	bool yellow_pink_beaconPlaced = false;
-	bool blue_pink_beaconPlaced = false;
-	bool pink_green_beaconPlaced = false;
-	Beacon detectedBeacon;
-	std::vector<Beacon> beaconsList;
+	ros::Publisher beacon_pub;	
+	Beacon detectedBeacon; //stores all the details of a detected beacon
+	std::vector<Beacon> beaconsList; //vector of all the potential beacon combinations to check which beacon was detected
 
 	bool beaconDetected = false;	
 	
 
 public:
+	//descriptions of these in cpp file
 	ImageConverter();
 	void imageCb(const sensor_msgs::ImageConstPtr& msg);
-	//void beaconCb(const comp3431_starter::beacon_msgPtr& beaconPlaced);
 	void depth_callback(const sensor_msgs::ImageConstPtr& depthMsg);
 	Beacon getBeaconByColours(std::string top, std::string bottom);
 	std::vector<int> getColouredObjectDetectedXY(std::string colour, std_msgs::Header header, cv::Mat hsvImage);

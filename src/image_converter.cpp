@@ -177,7 +177,6 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg)
     // By checking the existance of coloured blobs and their relative vertical position
 	if (yellowObjectDetected && pinkObjectDetected && yellowObjectY<pinkObjectY) {
 		ROS_INFO("Detected yellow top, pink bottom beacon!!!\n");
-		yellow_pink_beaconPlaced = true;
 		beaconDetected = true;
 		detectedBeacon = getBeaconByColours("yellow","pink");
 		detectedBeacon.beaconMsg.id = detectedBeacon.id;
@@ -190,7 +189,6 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg)
 		detectedBeacon.beaconMsg.depth = 0;
 	} else if (greenObjectDetected && pinkObjectDetected && pinkObjectY<greenObjectY) {
 		ROS_INFO("Detected pink top, green bottom beacon!!!\n");
-		pink_green_beaconPlaced = true;
 		beaconDetected = true;
 		detectedBeacon = getBeaconByColours("pink","green");
 		detectedBeacon.beaconMsg.id = detectedBeacon.id;
@@ -204,7 +202,6 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg)
 	} else if (yellowObjectDetected && pinkObjectDetected && pinkObjectY<yellowObjectY) {
 		ROS_INFO("Detected pink top, yellow bottom beacon!!!\n");
 		detectedBeacon = getBeaconByColours("pink","yellow");
-		pink_yellow_beaconPlaced = true;
 		beaconDetected = true;
 		detectedBeacon.beaconMsg.id = detectedBeacon.id;
 		detectedBeacon.beaconMsg.topColour = detectedBeacon.top;
@@ -216,7 +213,6 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg)
 		detectedBeacon.beaconMsg.depth = 0;
   } else if (blueObjectDetected && pinkObjectDetected && blueObjectY<pinkObjectY) {
 		ROS_INFO("Detected blue top, pink bottom beacon!!!\n");
-		blue_pink_beaconPlaced = true;
 		beaconDetected = true;
 		detectedBeacon = getBeaconByColours("blue","pink");
 		detectedBeacon.beaconMsg.id = detectedBeacon.id;

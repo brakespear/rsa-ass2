@@ -2,18 +2,6 @@
 #include <ros/ros.h>
 #include "ass2/beaconMarkers.hpp"
 
-/*
-beacon_msg.msg:
-int8 id
-int32 row
-int32 col
-float64 depth
-string topColour
-string bottomColour
-int32 minRow
-int32 maxRow
-*/
-
 //using namespace cv;
 
 beaconMarkers::beaconMarkers()
@@ -23,23 +11,27 @@ beaconMarkers::beaconMarkers()
   marker_pub = nh_.advertise<visualization_msgs::Marker>("/beacons", 1);
   
   time(&start_time);
-  //std::cout << "start time is " << start_time << "\n";
 	
 }
 
+/*
+ * Callback for when a beacon is detected. Determines which beacon was detected, and if that beacon
+ * is closer to the centre than the current detection being used for that beacon, this beacon will
+ * be placed on the map and erase the old one. The marker colours and size are set and sent to the
+ * map. The position, orientation and distance of the beacon from the robot (depth) is used to 
+ * determine where to place the beacon on the map. 
+ */
 void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
 	
 	time_t timer; //current time
 	time(&timer); 
-	std::cout << "current time is " << timer << " and start time is " << start_time << "\n";
       
     double diff = difftime(timer, start_time);
 
+    //only detect beacon if > 5 seconds have passed since program started running
     if (diff < (double) 5) {
-      std::cout << "diff was 2 small, it is " << diff << "\n";
 		  return;
     }
-    std::cout << "diff was not too small\n";
     
     tf::StampedTransform transform;
     visualization_msgs::Marker marker;
@@ -65,11 +57,9 @@ void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
 	    
 	    int diff = abs(CENTRE_COLUMN - beacon_msg.col);
 	    if (diff > yellowPinkMostCentre) {
-	      std::cout << "diff was bigger, returning\n";
 	      return;
 	    } else {
 	      yellowPinkMostCentre = diff;
-	      std::cout << "diff was smaller, most centre is now " << diff << "\n";
 	    }
 
     } else if (beacon_msg.bottomColour == "green" && beacon_msg.topColour == "pink") {
@@ -83,6 +73,7 @@ void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
 	    topmarker.color.g = 0.0;
 	    topmarker.color.b = 0.75;
 	    
+	    //check where beacon is - if more centre than current detection replace it
 	    int diff = abs(CENTRE_COLUMN - beacon_msg.col);
 	    if (diff > pinkGreenMostCentre) {
 	      return;
@@ -127,26 +118,22 @@ void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
 	    }
 
     } else {
-      std::cout << "YOU FUCKED UP LOL\n";
+      std::cout << "invalid beacon\n";
     	return;
     }
     
     marker.id = beacon_msg.id;
     topmarker.id = beacon_msg.id + 4;
-    std::cout << "you didn't fuck up lol\n";
     
     try 
     {
       tf_listener.lookupTransform("/map", "/base_link", ros::Time(0), transform);
-      std::cout << "transform worked\n";
 
+      //determine angles by finding cos/sin of current orientation of the robot
       double cosAngle = cos(tf::getYaw(transform.getRotation()));
-      std::cout << "calculated cos angle is " << cosAngle << "\n";
-      
-      double sinAngle = sin(tf::getYaw(transform.getRotation()));
-      std::cout << "calculated sin angle is " << sinAngle << "\n";
-		 
+      double sinAngle = sin(tf::getYaw(transform.getRotation())); 
 		  
+      //use angles and depth to determine the position of the beacin
       marker.pose.position.x = transform.getOrigin().x() + beacon_msg.depth * cosAngle;     
       marker.pose.position.y = transform.getOrigin().y() + beacon_msg.depth * sinAngle;
       marker.pose.position.z = 0.2;
@@ -167,6 +154,7 @@ void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
     	ROS_ERROR("Nope! %s\n", ex.what());
     }
     
+    //add two markers; one for bottom colour and one for top colour
     marker.type = visualization_msgs::Marker::CYLINDER;
     marker.scale.x = 0.3; //0.1;
     marker.scale.y = 0.3; //0.1;
@@ -177,7 +165,8 @@ void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
     marker.lifetime = ros::Duration();
     marker.action = visualization_msgs::Marker::ADD;
     
-    std::cout << "put a marker of colour " << marker.ns << " at position " << marker.pose.position.x << " " <<  marker.pose.position.y << " " << marker.pose.position.z << "\n";
+    std::cout << "put a marker of colour " << marker.ns << " at position " << marker.pose.position.x
+            << " " <<  marker.pose.position.y << " " << marker.pose.position.z << "\n";
     marker_pub.publish(marker);
 
     topmarker.type = visualization_msgs::Marker::CYLINDER;
@@ -190,7 +179,8 @@ void beaconMarkers::beacon_callback(const ass2::beacon_msg &beacon_msg) {
     topmarker.lifetime = ros::Duration();
     topmarker.action = visualization_msgs::Marker::ADD;
     
-    std::cout << "put a top marker of colour " << topmarker.ns << " at position " << topmarker.pose.position.x << " " <<  topmarker.pose.position.y << " " << topmarker.pose.position.z << "\n";
+    std::cout << "put a top marker of colour " << topmarker.ns << " at position " << 
+            topmarker.pose.position.x << " " <<  topmarker.pose.position.y << " " << 
+            topmarker.pose.position.z << "\n";
     marker_pub.publish(topmarker);
 }
-
